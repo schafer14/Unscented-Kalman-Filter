@@ -94,7 +94,6 @@ TODO:
 Complete this function! Make sure you switch between lidar and radar
 measurements.
 */
-  cout << "Starting Loop" << endl;
   if (!is_initialized_) {
     if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
       double px = meas_package.raw_measurements_[0] * cos(meas_package.raw_measurements_[1]);
@@ -120,7 +119,6 @@ measurements.
   if (meas_package.sensor_type_ == MeasurementPackage::LASER && use_laser_) {
     UpdateLidar(meas_package);
   }
-  cout << "Ending loop" << endl;
 }
 
 /**
@@ -135,7 +133,6 @@ TODO:
 Complete this function! Estimate the object's location. Modify the state
 vector, x_. Predict sigma points, the state, and the state covariance matrix.
 */
-  cout << "starting Predict" << endl;
   // GENERATE SIGMA POINTS
   MatrixXd Xsig_aug = MatrixXd(n_aug_, n_sig_);
   VectorXd x_aug = VectorXd(n_aug_);
@@ -220,7 +217,6 @@ position. Modify the state vector, x_, and covariance, P_.
 
   You'll also need to calculate the lidar NIS.
   */
-  cout << "Calculating Lidar" << endl;
   int n_z_ = 2;
   VectorXd z = meas_package.raw_measurements_;
   MatrixXd Zsig = MatrixXd(n_z_, n_sig_);
@@ -228,6 +224,8 @@ position. Modify the state vector, x_, and covariance, P_.
   MatrixXd S = MatrixXd(n_z_, n_z_);
   MatrixXd Tc = MatrixXd(n_x_, n_z_);
 
+  Zsig.fill(0.0);
+  z_pred.fill(0.0);
   for (int i = 0; i < n_sig_; i++) {
     Zsig.col(i) = Xsig_pred_.col(i).head(2);    
 
@@ -236,7 +234,7 @@ position. Modify the state vector, x_, and covariance, P_.
 
   S.fill(0.0);
   for (int i = 0; i < n_sig_; i ++) {
-    VectorXd zdiff = Zsig.col(i) = z_pred;
+    VectorXd zdiff = Zsig.col(i) - z_pred;
 
     while (zdiff(1) > M_PI) zdiff(1) -= 2. * M_PI;
     while (zdiff(1) < -M_PI) zdiff(1) += 2. * M_PI;
@@ -270,7 +268,6 @@ position. Modify the state vector, x_, and covariance, P_.
   x_ = x_ + K * zdiff;
   P_ = P_ - K * S * K.transpose();
 
-  cout << "Ending Laser" << endl;
 }
 
 /**
@@ -286,7 +283,6 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
   You'll also need to calculate the radar NIS.
   */
-  cout << "Starting Radar" << endl;
   int n_z_ = 3;
   VectorXd z = meas_package.raw_measurements_;
   MatrixXd Zsig = MatrixXd(n_z_, n_sig_);
@@ -353,5 +349,4 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   x_ = x_ + K * zdiff;
   P_ = P_ - K * S * K.transpose();
 
-  cout << "Ending Radar" << endl;
 }
